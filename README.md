@@ -50,12 +50,38 @@ Pada tahap awal, dilakukan pengujian eksploratif untuk membuktikan asumsi ketida
 
 ---
 
+## 📈 Progres Minggu 2: Preprocessing, Differencing & Identifikasi Parameter
+Tahap kedua memfokuskan pada penyiapan eksperimen yang adil (*fair comparison*) bebas kebocoran data (*data leakage*) sebelum masuk ke pemodelan:
+
+### 1. Audit Frekuensi & Pembagian Data Kronologis (80:20)
+- **Kontinuitas Harian:** Seluruh 243 hari observasi terverifikasi lengkap (`0` hari kosong) pada indeks frekuensi harian (`D`).
+- **Train-Test Split Kronologis:** Data dibagi berurutan berdasarkan waktu menjadi **194 hari data latih** (`2026-01-01` s.d. `2026-07-13`) dan **49 hari data uji** (`2026-07-14` s.d. `2026-08-31`).
+
+### 2. Pembuktian Stasioneritas Pasca-Differencing (Data Latih)
+
+| Skenario Transformasi | ADF Statistic | p-value | Evaluasi |
+| :--- | :--- | :--- | :--- |
+| **First-Order Differencing (`d=1`)** | `-7.0847` | `0.0000` | **STASIONER** (`p < 0.05`) |
+| **Seasonal + First Differencing (`d=1, D=1, s=7`)** | `-6.1085` | `0.0000` | **STASIONER** (`p < 0.05`) |
+
+### 3. Identifikasi Kandidat Orde SARIMA & Penyiapan Data Prophet
+- **Pembacaan ACF & PACF:** Plot ACF pada skenario `d=1, D=1, s=7` terpotong tajam (*cut-off*) setelah **lag 1** dan **lag musiman ke-7**, sedangkan plot PACF meluruh bertahap (*tails off*).
+- **Kandidat Model Utama:** $\text{SARIMA}(0,1,1)(0,1,1)_7$ beserta model pembanding $\text{SARIMA}(1,1,1)(0,1,1)_7$, $\text{SARIMA}(1,1,1)(1,1,1)_7$, $\text{SARIMA}(2,1,1)(0,1,1)_7$, dan $\text{SARIMA}(0,1,2)(0,1,1)_7$.
+- **Struktur Meta Prophet:** Penyesuaian nama kolom target menjadi `ds` (tanggal) dan `y` (jumlah penolakan) untuk pengujian pada rentang 49 hari yang identik.
+
+---
+
 ## 📂 Struktur Repositori
 ```text
 .
 ├── README.md
 ├── data_tolak_hb.csv
-└── 01_data_prep_and_stationarity_test.ipynb
+├── 01_data_prep_and_stationarity_test.ipynb
+├── 02_preprocessing_and_order_identification.ipynb
+├── train_sarima.csv
+├── test_sarima.csv
+├── train_prophet.csv
+└── test_prophet.csv
 ```
 
 ---
@@ -65,6 +91,7 @@ Pada tahap awal, dilakukan pengujian eksploratif untuk membuktikan asumsi ketida
 * **Data Processing:** `pandas`, `numpy`
 * **Visualisasi Data:** `matplotlib`, `statsmodels`
 * **Uji Time Series:** `statsmodels.tsa.stattools.adfuller`, `plot_acf`
+* **Forecasting & Evaluasi (Progres Lanjutan):** `SARIMAX`, `prophet`, `scikit-learn (MAE, RMSE, MASE)`
 * **Environment:** Google Colab / Jupyter Notebook
 
 ---
